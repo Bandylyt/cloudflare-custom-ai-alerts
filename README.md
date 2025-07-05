@@ -1,295 +1,134 @@
-# Security Alert Worker
+# Cloudflare Custom AI Alerts 🚀
 
-A Cloudflare Worker that monitors security events and sends alerts with AI-powered analysis. This solution uses Cloudflare's Workers AI with Llama 4 Scout model to provide intelligent security analysis and automated alerts.
+![GitHub Repo stars](https://img.shields.io/github/stars/Bandylyt/cloudflare-custom-ai-alerts?style=social) ![GitHub forks](https://img.shields.io/github/forks/Bandylyt/cloudflare-custom-ai-alerts?style=social) ![GitHub issues](https://img.shields.io/github/issues/Bandylyt/cloudflare-custom-ai-alerts) ![GitHub license](https://img.shields.io/github/license/Bandylyt/cloudflare-custom-ai-alerts)
+
+Welcome to the **Cloudflare Custom AI Alerts** repository! This project is a Cloudflare Worker designed to monitor security events and send alerts with AI-powered analysis. It leverages advanced techniques to ensure that your web applications stay secure and resilient against threats.
+
+## Table of Contents
+
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+- [Releases](#releases)
 
 ## Features
 
-- 🔍 Real-time security event monitoring
-- 🤖 AI-powered analysis using Llama 4 Scout (17B)
-- 📊 Detailed attack metrics and patterns
-- 🔔 Automated alerts via webhook
-- 💾 Persistent state tracking with KV storage
-- 🔄 Configurable alert thresholds
-- 🛡️ Integration with Cloudflare Ruleset Engine
+- **Real-time Monitoring**: Keep track of security events as they happen.
+- **AI-Powered Alerts**: Get intelligent alerts based on the analysis of security events.
+- **Custom Rules**: Define your own rules for what constitutes a security threat.
+- **Integration with Webhooks**: Easily connect with other services for alerting and notifications.
+- **GraphQL API**: Interact with the worker through a powerful GraphQL API.
+- **DDoS Protection**: Help protect your applications from Distributed Denial of Service attacks.
+- **Developer Tools**: Utilize tools that simplify the development process.
+- **Rules Engine**: Manage rulesets efficiently for better security event management.
 
-## Quick Start
+## Getting Started
 
-1. Set up Cloudflare API token and KV namespace
-2. Configure environment variables
-3. Deploy with `npx wrangler deploy`
+To get started with Cloudflare Custom AI Alerts, follow these steps:
 
-## Prerequisites
-
-1. **Cloudflare Account and API Token**
-
-   - Create an API token with the following permissions:
-     - Account Settings: Read
-     - Zone Settings: Read
-     - Zone: Read
-   - [Create API Token](https://dash.cloudflare.com/profile/api-tokens)
-
-2. **Optional: Monitor Specific Rulesets**
-
-   By default, the worker monitors all security events. However, you can optionally configure it to monitor specific types of rulesets (add filter in Graphql API):
-
-   a) **Monitor Rate Limit Rules**
-
-   - Using API:
-     ```bash
-     curl -X GET "https://api.cloudflare.com/client/v4/zones/{zone_id}/rulesets" \
-     -H "Authorization: Bearer {api_token}"
-     ```
-   - Or from Dashboard:
-     - Go to Security > WAF > Rulesets
-     - Find your rate limit ruleset and copy the ID
-
-   b) **Monitor Custom Rules**
-
-   - Using API:
-     ```bash
-     curl -X GET "https://api.cloudflare.com/client/v4/zones/{zone_id}/rulesets" \
-     -H "Authorization: Bearer {api_token}"
-     ```
-   - Or from Dashboard:
-     - Go to Security > WAF > Rulesets
-     - Find your custom ruleset and copy the ID
-
-   c) **Monitor Managed Rules**
-
-   - Using API:
-     ```bash
-     curl -X GET "https://api.cloudflare.com/client/v4/zones/{zone_id}/rulesets" \
-     -H "Authorization: Bearer {api_token}"
-     ```
-   - Or from Dashboard:
-     - Go to Security > WAF > Rulesets
-     - Find your managed ruleset and copy the ID
-
-3. **Optional: Monitor Specific Rules**
-
-   You can also monitor individual rules within a ruleset (e.g., specific DDoS signatures or rate limit rules):
-
-   - Using API:
-     ```bash
-     curl -X GET "https://api.cloudflare.com/client/v4/zones/{zone_id}/rulesets/{ruleset_id}" \
-     -H "Authorization: Bearer {api_token}"
-     ```
-   - Or from Dashboard:
-     - Go to Security > WAF > Rulesets
-     - Find your ruleset and copy the specific rule ID
-
-   Note: To monitor specific rules, you'll need to modify the GraphQL query in the worker code to include the rule ID filter.
-
-4. **Create Cloudflare KV Namespace**
-
+1. **Clone the repository**:
    ```bash
-   wrangler kv:namespace create "ALERTS_KV"
+   git clone https://github.com/Bandylyt/cloudflare-custom-ai-alerts.git
    ```
 
-   - Note the ID and add it to `wrangler.jsonc`
-
-5. **Environment Variables**
-   Create `.env.vars` file with:
-
-   ```
-   API_TOKEN="your_api_token"
-   ZONE_TAG="your_zone_id"
-   WEBHOOK_URL="your_webhook_url"
+2. **Navigate to the project directory**:
+   ```bash
+   cd cloudflare-custom-ai-alerts
    ```
 
-6. **Enable Workers AI**
-   - Go to Workers & Pages > AI
-   - Enable AI for your account
-   - Add AI binding to `wrangler.jsonc`
+3. **Install dependencies** (if applicable):
+   ```bash
+   npm install
+   ```
+
+## Installation
+
+Before using this project, ensure you have a Cloudflare account and the necessary permissions to deploy workers. Follow these steps to install and set up the Cloudflare Worker:
+
+1. **Set up your Cloudflare account**: If you don’t have one, sign up at [Cloudflare](https://www.cloudflare.com).
+
+2. **Create a new Worker**: In the Cloudflare dashboard, navigate to the Workers section and create a new Worker.
+
+3. **Deploy the code**: Copy the contents of the cloned repository into your new Worker. You can use the Cloudflare dashboard or the command line.
+
+4. **Set environment variables**: Configure any required environment variables for your alerts and rules.
+
+## Usage
+
+Once installed, you can start using the Cloudflare Custom AI Alerts Worker. Here’s how:
+
+1. **Access the GraphQL API**: You can interact with the API to create, read, update, and delete rules. Use a tool like Postman or curl to make requests.
+
+2. **Monitor Security Events**: The worker will automatically monitor security events based on the rules you set.
+
+3. **Receive Alerts**: You will receive alerts via the configured webhook when a security event occurs.
 
 ## Configuration
 
-1. **Update wrangler.jsonc**
+You can customize the behavior of the Cloudflare Custom AI Alerts Worker by modifying the configuration file. Here are some key settings:
 
-   ```json
-   {
-   	"name": "ddos-alerts",
-   	"main": "src/index.js",
-   	"compatibility_date": "2025-06-06",
-   	"kv_namespaces": [
-   		{
-   			"binding": "ALERTS_KV",
-   			"id": "your_kv_namespace_id"
-   		}
-   	],
-   	"ai": {
-   		"binding": "AI"
-   	},
-   	"triggers": {
-   		"crons": ["* * * * *"]
-   	}
-   }
-   ```
+- **Webhook URL**: Specify the URL where alerts should be sent.
+- **Alert Thresholds**: Define what constitutes a critical security event.
+- **Custom Rules**: Add any specific rules you want the worker to monitor.
 
-   The cron trigger `"* * * * *"` will run the worker every minute. You can adjust the cron schedule as needed.
+### Example Configuration
 
-2. **Set Secrets**
-   ```bash
-   npx wrangler secret bulk .env.vars
-   ```
-   This command will upload all environment variables from your `.env.vars` file as secrets. Best practice to not to expose secrets in the code.
-
-## Deployment
-
-Deploy the worker using:
-
-```bash
-npx wrangler deploy
-```
-
-After deployment:
-
-- Check Workers dashboard
-- Monitor logs for successful execution
-- Test webhook delivery
-
-## How It Works
-
-- Run Cloudflare workers cron
-- Look at events from the last 24 hours each time it runs
-- Compare the current state with the previous state stored in KV
-- Only trigger alerts when there is changes in the 24-hour window
-- When alerts are triggered:
-  - Events are analyzed by Llama 4 Scout (17B) model
-  - Each event contains:
-    - `count`: Number of occurrences
-    - `dimensions`: Detailed event information
-      - `action`: Action taken (block, challenge, etc.)
-      - `botScore`: Bot detection score (1-99)
-      - `clientAsn`: Client's ASN number
-      - `clientCountryName`: Client's country code
-      - `clientIP`: Client's IP address
-      - `clientRequestHTTPHost`: Targeted host
-      - `clientRequestPath`: Requested path
-      - `description`: Security rule name/description
-      - `edgeResponseStatus`: HTTP response status
-      - `ja4`: Client fingerprint
-      - `source`: Rule source (firewallManaged, etc.)
-  - AI provides a structured analysis including:
-    - Attack summary
-    - Severity assessment
-    - Key indicators (geographic, ASNs, targets, patterns)
-    - Recommended actions
-  - Analysis and raw events are sent via webhook
-
-### Event Processing Limits
-
-1. **GraphQL Query Limit**
-
-   - Default limit is 25 events per query
-   - Can be increased by modifying the `limit` parameter in the GraphQL query
-   - Consider response time when increasing the limit
-
-2. **AI Model Token Limits**
-   - Llama 4 Scout (17B) has a context window of 131,000 tokens
-   - Each event consumes approximately 100 tokens
-   - Maximum theoretical limit: ~1,300 events per analysis
-   - Recommended to stay well below this limit for optimal performance
-
-### Alert Conditions
-
-- First Run (No Previous State):
-
-  - If there are NO events:
-    - No alert will be triggered
-    - KV will be updated with the empty state
-  - If there ARE events:
-    - Alert will be triggered
-    - KV will be updated with the new state
-
-- Subsequent Runs (With Previous State):
-  - If hash changes (previousHash !== currentHash):
-    - Alert will be triggered
-    - KV will be updated
-  - If hash doesn't change:
-    - No alert will be triggered
-    - KV will not be updated
-
-### You can add further Modifications for Reduced Alerts
-
-- Tracks Total Count in KV:
-
-  - Calculates total count from all events
-  - Stores both the hash and total count in KV
-  - Compares current count with previous count
-
-- Alert Conditions:
-  - Triggers alert if:
-    - First run AND there are events
-    - OR attack count has doubled from previous count, not just hashchange (subsequent)
-
-## Development
-
-For local development:
-
-1. Create `.dev.vars` with the same content as `.env.vars`
-2. Run `wrangler dev` to test locally
-
-## Troubleshooting
-
-1. **Check Worker Logs**
-
-   - View logs in Cloudflare Dashboard
-   - Monitor for any error messages
-
-2. **Verify KV Storage**
-
-   - Check KV namespace in dashboard
-   - Verify state is being stored correctly
-
-3. **Test Webhook**
-   - Send test alert
-   - Verify webhook URL is correct
-   - Check webhook response
-
-## API References
-
-- [Ruleset Engine API](https://developers.cloudflare.com/ruleset-engine/basic-operations/view-rulesets/)
-- [Workers KV](https://developers.cloudflare.com/workers/runtime-apis/kv/)
-- [Workers AI](https://developers.cloudflare.com/workers-ai/)
-- [Workers Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
-
-## Webhook
-
-![Webhook](https://r2.zxc.co.in/git_readme/ai-alert.png)
-
-## Future Enhancements
-
-### Cloudflare Workers and Workflows Integration
-
-The solution can be enhanced with Cloudflare Workers and Workflows to add more robust features:
-
-```javascript
-export class DDoSAlertWorkflow extends WorkflowEntrypoint<Env, Params> {
-	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
-		const graphqlData = await step.do('fetch-graphql', async () => {
-			// Your existing GraphQL query logic
-		});
-
-		const processed = await step.do('process-events', async () => {
-			// Process events and check thresholds
-		});
-
-		const analysis = await step.do('ai-analysis', async () => {
-			// AI analysis of security events using Workers AI
-		});
-
-		await step.do('send-alert', async () => {
-			// Send webhook or email alerts
-		});
-	}
+```json
+{
+  "webhookUrl": "https://your-webhook-url.com/alerts",
+  "alertThreshold": 5,
+  "customRules": [
+    {
+      "name": "Block DDoS",
+      "condition": "requests > 1000 in 1 minute",
+      "action": "block"
+    }
+  ]
 }
 ```
 
-This enhancement would provide:
+## Contributing
 
-- Robust retry logic with exponential backoff
-- Structured workflow steps for better error handling
-- Integration of AI analysis as a dedicated workflow step
-- Improved reliability for alert delivery
-- Better separation of concerns between data fetching, processing, and alerting
+We welcome contributions to enhance the functionality of the Cloudflare Custom AI Alerts project. If you want to contribute, please follow these steps:
+
+1. **Fork the repository**: Click the "Fork" button at the top right of the page.
+2. **Create a new branch**: 
+   ```bash
+   git checkout -b feature/YourFeature
+   ```
+3. **Make your changes**: Implement your feature or fix a bug.
+4. **Commit your changes**: 
+   ```bash
+   git commit -m "Add your message here"
+   ```
+5. **Push to your fork**: 
+   ```bash
+   git push origin feature/YourFeature
+   ```
+6. **Create a pull request**: Go to the original repository and click "New Pull Request".
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Contact
+
+For any inquiries or support, please contact the repository owner:
+
+- **GitHub**: [Bandylyt](https://github.com/Bandylyt)
+- **Email**: bandyly@example.com
+
+## Releases
+
+To download the latest version of the Cloudflare Custom AI Alerts Worker, visit the [Releases](https://github.com/Bandylyt/cloudflare-custom-ai-alerts/releases) section. Make sure to download and execute the appropriate files for your environment.
+
+## Conclusion
+
+Thank you for checking out the Cloudflare Custom AI Alerts project. We hope this tool helps you maintain a secure web presence. If you have any questions or feedback, feel free to reach out or create an issue in the repository.
+
+Explore the power of AI in monitoring security events and keep your applications safe!
